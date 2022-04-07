@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForcrTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="hoverWrap position-relative">
+        <svg class="forceHover" style="width:500; height:300"></svg>
+    </div>
+    <script>
+        // js各個圓大小
+        const data = [{'r': 3}, {'r':34}, {'r': 23}, {'r': 33},
+            {'r': 13},{'r': 22},{'r': 43},{'r': 17},{'r': 38}]
+
+        const dots = d3.select('.forceHover')
+                        .selectAll('circle')
+                        .data(data)
+                        .enter()
+                        .append('circle')
+                        .attr('r', d => d.r)
+                        .attr('fill', 'blue')
+                        .attr('opacity', 0.3)
+        // 設定力模擬器
+        const simulation = d3.forceSimulation()
+                .force("center", d3.forceCenter().x(250).y(150)) 
+                .force("charge", d3.forceManyBody().strength(.3)) 
+                .force("collide",d3.forceCollide().strength(.1).radius(30).iterations(1))
+        //綁定資料
+        simulation.nodes(data)
+                .on('tick', function(d){
+                    dots.attr('cx', d=>d.x)
+                        .attr('cy', d=>d.y)
+                })
+        // 建立tooltips
+        const tooltips = d3.select(".hoverWrap")
+                        .append("div")
+                        .style("opacity", 0)
+                        .style('position', 'absolute')
+                        .attr("class", "tooltip")
+                        .style("background-color", "white")
+                        .style("border", "solid")
+                        .style("border-width", "2px")
+                        .style("border-radius", "5px") //邊框弧
+                        .style("padding", "5px") //框大小
+        // hover
+        dots.on('mouseover', mouseover)
+            .on('mouseleave', mouseleave)
+            function mouseover(event, d){
+        console.log(d)
+        d3.select(this)
+        .attr('stroke', 'black')
+        .attr('stroke-width', '3px')
+        .attr('opacity', 0.7)
+        .style('cursor', 'pointer')
+        
+        let pt = d3.pointer(event, this)
+        tooltips.style('opacity', 1)
+                .style('left', pt[0]+ 10 +'px')
+                .style('top', pt[1]+'px')
+                .html(`半徑：${d.r}`)
+    }
+
+    function mouseleave(event, d){
+        d3.select(this)
+        .attr('stroke', 'none')
+        .attr('stroke-width', '0')
+        .attr('opacity', 0.3)
+        
+        tooltips.style('opacity', 0)
+    }
+    </script>
+</body>
+</html>

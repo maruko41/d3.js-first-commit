@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <style>
+        .bubbleChart{
+          margin: auto;
+          width: 80%;
+          min-width: 300px;
+          position: relative;
+        }
+      
+        .bubbles {
+          stroke-width: 2px;
+          stroke: white;
+        }
+        .bubbles:hover {
+          stroke: black;
+        }
+      </style>
+    <h4 class="text-center mt-4">比較不同國家的平均壽命、人口數量與GDP</h4>
+    <div class="bubbleChart"></div>
+
+    <script>
+  // 先取資料
+  let data = []
+  async function getData(){
+    let dataGet;
+
+    const url = 'https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/4_ThreeNum.csv'
+
+    dataGet = await d3.csv(`${url}`);
+    data = dataGet
+    bubbleChart()
+  }
+  getData()
+  
+  // 建立氣泡圖
+  function bubbleChart(){
+    // RWD 清除原本的圖型
+    d3.select(".bubbleChart").select('svg').remove()
+
+    // 設定svg與邊界
+    const margin = {top: 10, right: 20, bottom: 30, left: 50},
+        svgWidth = parseInt(d3.select('.bubbleChart').style('width')),
+        svgHeight = svgWidth*0.8
+        width = svgWidth - margin.left - margin.right,
+        height = svgHeight - margin.top - margin.bottom;
+
+    // 建立svg
+    const svg = d3.select(".bubbleChart")
+        .append("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // 整理ＸＹ軸資料、Z的人口數量資料
+    const xData = data.map((i) => parseInt(i.gdpPercap))
+    const yData = data.map((i) => i.lifeExp)
+    const zData = data.map((i) => i.pop)
+
+    // 建立Ｘ比例尺與軸線
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(xData)])
+      .range([ 0, width ])
+      .nice()
+
+    const xAxis = d3.axisBottom(x)
+                    .tickFormat(d=> '$'+ d)
+
+    svg.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(xAxis);
+
+    // 建立Ｙ比例尺與軸線
+    const y = d3.scaleLinear()
+      .domain(d3.extent(yData))
+      .range([height, 0])
+      .nice()
+    
+    const yAxis = d3.axisLeft(y)
+                    .tickFormat(d => d+'歲')
+
+    svg.append("g")
+      .call(yAxis);
+
+    // 按照人口去設定氣泡大小的比例尺
+    const z = d3.scaleLinear()
+      .domain([d3.min(zData), 1310000000])
+      .range([4, 40]);
+
+    // 設定氣泡顏色，根據不同洲來設定
+    const myColor = d3.scaleOrdinal()
+        .domain(["Asia", "Europe", "Americas", "Africa", "Oceania"])
+        .range(d3.schemeSet2);
+ // 建立標籤tooltips
+ const tooltip = d3.select(".bubbleChart")
+      .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "black")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("color", "white")
+
+    // 設定顯示、移動、隱藏tooltips
+    const showTooltip = function(event, d) {
+      console.log(event)
+      // 漸漸出現
+      tooltip
+        .transition()
+        .duration(200)
+      
+      // 設定樣式與呈現文字
+      tooltip
+        .style("opacity", 1)
+        .html("國家: " + d.country)
+        .style("left", (event.x)/2 + "px")
+        .style("top", (event.y)/2+30 + "px")
+    }
+    const moveTooltip = function(event, d) {
+      tooltip
+        .style("opacity", 1)
+        .style("left", (event.x)/2 + "px")
+        .style("top", (event.y)/2+30 + "px")
+    }
+    const hideTooltip = function(event, d) {
+      tooltip
+        .transition()
+        .duration(200)
+        .style("opacity", 0)
+    }
+
+    // 綁定氣泡
+    const bubble = svg.append('g')
+      .selectAll("dot")
+      .data(data)
+      .join("circle")
+        .attr("class", "bubbles")
+        .attr("cx", d => x(d.gdpPercap))
+        .attr("cy", d => y(d.lifeExp))
+        .attr("r", d => z(d.pop))
+        .style("fill", d => myColor(d.continent))
+      .on("mouseover", showTooltip )
+      .on("mousemove", moveTooltip )
+      .on("mouseleave", hideTooltip )
+
+  }
+
+  // RWD
+  d3.select(window).on("resize", bubbleChart);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="chart"></div>
+    <style>
+        .chart{
+        width: 100%;
+        min-width: 300px;
+        margin: auto;
+    }
+    </style>
+    <script>
+        let data = []
+        async function getData() {
+        // 取資料
+        dataGet = await d3.csv('../data/20211-20221-20210103-202.csv')
+        data = dataGet.filter(i=>i['發病年週']>'202101')
+        drawChart()
+        };
+        getData()
+
+        // RWD
+        function drawChart(){
+        // 刪除原本的svg.charts，重新渲染改變寬度的svg
+        d3.select('.chart svg').remove();
+
+        // RWD 的svg 寬高
+        const rwdSvgWidth = parseInt(d3.select('.chart').style('width')),
+                rwdSvgHeight = rwdSvgWidth*0.8,
+                margin = 40,
+                bandWidth = 20 
+
+        const svg = d3.select('.chart')
+                        .append('svg')
+                        .attr('width', rwdSvgWidth)
+                        .attr('height', rwdSvgHeight);
+        // map 資料集
+        xData = data.map((i) => parseInt(i['發病年週'].substring(4,6))); // 取週數
+        yData = data.map((i) => parseInt(i['確定病例數']));
+
+        // 設定要給 X 軸用的 scale 跟 axis
+        const xScale = d3.scaleLinear()
+                        .domain(d3.extent(xData))
+                        .range([margin, rwdSvgWidth - margin]); // 寬度
+
+        // rwd X軸的刻度
+        let tickNumber = window.innerWidth > 900 ? xData.length/2 : 8;
+        const xAxis = d3.axisBottom(xScale)
+                        .ticks(tickNumber)
+                        .tickFormat(d=>d+'週')
+
+        // 呼叫繪製x軸、調整x軸位置
+        const xAxisGroup = svg.append("g")
+                            .call(xAxis)
+                            .attr("transform", `translate(0,${rwdSvgHeight - margin})`)
+
+        // 設定要給 Y 軸用的 scale 跟 axis
+        const yScale = d3.scaleLinear()
+                        .domain([0, d3.max(yData)])
+                        .range([rwdSvgHeight - margin, margin]); // 數值要顛倒，才會從低往高排
+
+        const yAxis = d3.axisLeft(yScale)
+                        .ticks(5)
+
+        // 呼叫繪製y軸、調整y軸位置
+        const yAxisGroup = svg.append("g")
+                            .call(yAxis)
+                            .attr("transform", `translate(${margin},0)`)
+        // 設定 path 的 d 
+        const lineChart = d3.line()
+                .x((d) => xScale(parseInt(d['發病年週'].substring(4,6))))
+                .y((d) => yScale(parseInt(d['確定病例數'])))
+        // 建立折線圖
+        svg.append('path')
+            .data(data)
+            .attr("d", lineChart(data))
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+        // 建立一個覆蓋svg的方形
+        svg
+            .append('rect')
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .attr('width', rwdSvgWidth - margin)
+            .attr('height', rwdSvgHeight - margin)
+            .style('cursor', 'pointer')
+        // 建立一個覆蓋svg的方形
+        svg
+            .append('rect')
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .attr('width', rwdSvgWidth - margin)
+            .attr('height', rwdSvgHeight - margin)
+            .style('cursor', 'pointer')
+            .on('mouseover', mouseover)
+            .on('mousemove', mousemove)
+            .on('mouseout', mouseout);
+        // 建立沿著折線移動的圓點點
+        const focus = svg.append('g')
+                        .append('circle')
+                        .style("fill", "none")
+                        .attr("stroke", "black")
+                        .attr('r', 8.5)
+                        .style("opacity", 0)
+
+        // 建立移動的資料標籤
+        const focusText = svg.append('g')
+                            .append('text')
+                            .style("opacity", 0)
+                            .attr("text-anchor", "left")
+                            .attr("alignment-baseline", "middle")
+        // 使用 d3.bisector() 找到滑鼠的 X 軸 index 值
+        const bisect = d3.bisector(d=>d['發病年週']).left;
+
+        // 滑鼠事件觸發的方法
+        function mouseover(){
+            focus.style("opacity", 1)
+            focusText.style("opacity",1)
+            }
+
+            function mousemove(){
+            // 把目前X的位置用xScale去換算
+            const x0 = xScale.invert(d3.pointer(event, this)[0]) 
+            // 由於我的X軸資料是擷取過的，這邊要整理並補零
+            const fixedX0 = parseInt(x0).toString().padStart(2,'0')
+            // 接著把擷取掉的2021補回來，因為data是帶入原本的資料
+            let i = bisect(data, '2021'+ fixedX0)
+            selectedData = data[i]
+
+            // 圓點
+            focus
+            // 換算到X軸位置時，一樣使用擷取過的資料，才能準確換算到正確位置
+            .attr("cx", xScale(selectedData['發病年週'].substring(4,6)))
+            .attr("cy", yScale(selectedData['確定病例數']))
+
+            focusText
+            .html('確診人數：' + selectedData['確定病例數'])
+            .attr("x", xScale(selectedData['發病年週'].substring(4,6))+15)
+            .attr("y", yScale(selectedData['確定病例數']))
+
+            }
+
+            function mouseout(){
+            focus.style("opacity", 0)
+            focusText.style("opacity", 0)
+            }
+        }
+
+        d3.select(window).on('resize', drawChart);
+    </script>
+</body>
+</html>

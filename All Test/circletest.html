@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="loopAnimation"></svg>
+    <script>
+    const loop = d3.select('.loopAnimation')
+                    .append('circle')
+                    .attr('cx', 50)
+                    .attr('cy', 50)
+                    .attr('r', 25)
+                    .attr('fill', 'blue')
+                    .transition()
+                    .duration(2000)
+                    .on('start', goRight)
+                function goRight(){
+                    d3.active(this)
+                    .attr('cx', 200)
+                    .transition()
+                    .on("start", goLeft);
+                    }
+                function goLeft (){
+                    d3.active(this)
+                    .attr('cx', 50)
+                    .transition()
+                    .on("start", goRight)
+                }
+    </script>
+    <svg width="700" height="500" fill="lightgray">
+        <rect x="0" y="0" width="300" height="200"></rect>
+        <circle cx="30" cy="30" r="20" fill="orange"></circle>
+        <circle cx="70" cy="70" r="20" fill="purple"></circle>
+        <circle cx="110" cy="110" r="20" fill="blue"></circle>
+    
+    </svg>
+</body>
+</html>

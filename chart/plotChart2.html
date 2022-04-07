@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="scatter2 m-auto"></div>
+    <style>
+        .scatter1 {
+      margin: auto;
+      width: 80%;
+      min-width: 300px;
+      margin: auto;
+    }
+    </style>
+    <script>
+        function scatter2(){
+            // 建立svg
+            let w = parseInt(d3.select(".scatter2").style("width")),
+                h = w*0.8,
+                margin = {
+                    top: 40,
+                    right: 20,
+                    bottom: 20,
+                    left: 40
+                    },
+                radius = 5;
+
+            let svg = d3.select(".scatter2").append("svg").attr('width', w).attr('height', h);
+            console.log(w, h)
+
+            let dataset = [
+                { x: 100,
+                y: 110 },
+                { x: 83,
+                y: 43 },
+                { x: 92,
+                y: 28 },
+                { x: 49,
+                y: 74 },
+                { x: 51,
+                y: 10 },
+                { x: 25,
+                y: 98 },
+                { x: 77,
+                y: 30},
+                { x: 20,
+                y: 83 },
+                { x: 11,
+                y: 63 },
+                { x: 4,
+                y: 55 },
+                { x: 0,
+                y: 0 },
+                { x: 85,
+                y: 100 },
+                { x: 60,
+                y: 40 },
+                { x: 70,
+                y: 80 },
+                { x: 10,
+                y: 20 },
+                { x: 40,
+                y: 50 },
+                { x: 25,
+                y: 31 }
+            ];
+            // 建立Ｘ比例尺與軸線
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(dataset, function (d) {
+                    return d.x + 10;
+                })])
+                .range([margin.left, w - margin.right]);
+
+            const xAxis = d3.axisTop()
+                .scale(xScale)
+
+            const xAxisLine = svg.append('g')
+                .attr('class', 'xAxis')
+                .attr('transform', `translate(0, ${margin.top})`)
+                .call(xAxis)
+
+            // 建立Ｙ比例尺與軸線
+            const yScale = d3.scaleLinear()
+            .domain([0, d3.max(dataset, function (d) {
+                return d.y + 10;
+            })])
+            .range([margin.top, h - margin.bottom])
+
+            const yAxis = d3.axisLeft()
+                .scale(yScale)
+
+            const yAxisLine = svg.append('g')
+                .attr('class', 'yAxis')
+                .attr('transform', `translate(${margin.left}, 0)`)
+                .call(yAxis)
+            // 資料綁定上circle
+            svg.selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr('cx', function (d) {
+                    return xScale(d.x);
+                })
+                .attr('cy', function (d) {
+                    return yScale(d.y);
+                })
+                .attr('r', 5)
+                .attr('fill', '#000')
+                .on("mouseover", handleMouseOver)
+                .on("mouseout", handleMouseOut);
+            //  mouseover 時點點變色+tooltip
+            function handleMouseOver(d, i) {
+                // 選定this的元素，改變hover過去的顏色跟形狀
+                d3.select(this)
+                    .attr('fill', 'orange')
+                    .attr('r', radius * 2);
+
+                // 加上tooltips
+                let pt = d3.pointer(event, this)
+                svg.append("text")
+                    .attr('class', 'hoverTextInfo')
+                    .attr('x', pt[0] + 10)
+                    .attr('y', pt[1] - 10)
+                    .style('fill', 'red')
+                    .text([`x:${d.x}, y:${d.y}`])
+            }
+
+            // mouseleave 時變回原樣
+            function handleMouseOut(d, i) {
+                d3.selectAll('.hoverTextInfo').remove()
+                d3.select(this)
+                    .attr('fill', 'black')
+                    .attr('r', radius)
+            }
+            // 滑鼠click的時候增加一個點
+            svg.on("click", function () {
+            let coords = d3.pointer(event, this);
+
+            let newData = {
+            // 把XY座標軸轉換成資料
+                x: Math.round(xScale.invert(coords[0])),
+                y: Math.round(yScale.invert(coords[1]))
+            };
+
+            // 將增加的資料座標推入原本的data
+            dataset.push(newData);
+            // 將新的資料綁定上circle、綁定 mouseover/mouseleave 方法
+            svg.selectAll("circle")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr('cx', function (d) {
+                    return xScale(d.x);
+                })
+                .attr('cy', function (d) {
+                    return yScale(d.y);
+                })
+                .attr('r', 5)
+                .attr('fill', '#000')
+                .on("mouseover", handleMouseOver)
+                .on("mouseout", handleMouseOut);
+            })
+            }
+
+            // RWD
+            d3.select(window).on("resize", scatter2());
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForcrTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="forceLink" style="width:500; height:300"></svg>
+    <script>
+        const data = {
+    "nodes": [
+        {"id": 1, "name": "A"},
+        {"id": 2, "name": "B"},
+        {"id": 3, "name": "C"},
+        {"id": 4, "name": "D"},
+        {"id": 5, "name": "E"},
+        {"id": 6, "name": "F"},
+        {"id": 7, "name": "G"},
+        {"id": 8, "name": "H"},
+        {"id": 9, "name": "I"},
+        {"id": 10, "name": "J"}
+			    ],
+    "links": [
+        {"source": 1, "target": 2},
+        {"source": 1, "target": 3},
+        {"source": 1, "target": 6},
+        {"source": 2, "target": 3},
+        {"source": 2,"target": 7},
+        {"source": 3,"target": 4},
+        {"source": 8,"target": 3},
+        {"source": 4,"target": 5},
+        {"source": 4,"target": 9},
+        {"source": 5,"target": 10}
+      ]
+    }
+    const dots =  d3.select('.forceLink')
+                    .append('g')
+                    .selectAll('circle')
+                    .data(data.nodes)
+                    .enter()
+                    .append('circle')
+                    .attr('r', 15)
+                    .style('fill', 'green')
+                    .style('opacity', 0.4)
+
+        const link = d3.select('.forceLink')
+                        .selectAll("line")
+                        .data(data.links)
+                        .join("line")
+                        .style("stroke", "#aaa")
+        // 設定力模擬器
+            const simulation = d3.forceSimulation(data.nodes)
+                    .force("link",  d3.forceLink().id(d=> d.id).links(data.links))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(250, 150))
+                    .on('tick', ticked)
+                      
+
+        // 設定 ticked 方法
+        function ticked(d){
+            link
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+            dots.attr("cx", d=> d.x)
+                .attr("cy", d => d.y);
+   }
+    </script>
+</body>
+</html>

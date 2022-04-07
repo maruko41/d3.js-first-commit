@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LineTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="line" width="300" height="200"></svg>
+    <svg class="area" width="300" height="200"></svg>
+    <svg class="axis" width="300" height="200"></svg>
+    <svg class="star" width="300" height="200"></svg>
+    <script>
+        const data1 = [{x:10,y:100},{x:20,y:100},{x:30,y:100},{x:90,y:20},{x:220,y:10}]
+
+        const line = d3.line()
+               .x(d=> d.x) // 設定x值要抓哪些資料
+               .y(d=> d.y) // 設定y值要抓哪些資料
+               line(data1)
+               d3.select('.line')
+                    .append('path')
+                    .attr('d', line(data1))
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', '2')
+                    .attr('fill', 'none')
+
+                const area = d3.area()
+                .x(d=>d.x)
+                .y1(d=>d.y)
+                .y0(10)
+
+                area(data1)
+                d3.select('.area')
+                .append('path')
+                .attr('d', area(data1))
+                .attr('stroke', 'blue')
+                .attr('fill', 'blue')
+
+
+                // 我目前的資料集
+                    const data2 = [{x:10,y:100},{x:20,y:100},{x:30,y:100},{x:90,y:20},{x:220,y:10}]
+
+                    // 抓出 x 軸要使用的值
+                    const xData = data2.map((i) => i.x);
+
+                    // 設定X軸的比例尺與繪製範圍
+                    const xScale = d3.scaleLinear()
+                                    .domain([0, d3.max(xData)])
+                                    .range([10, 290]);
+
+                    //使用xScale的設定，繪製刻度(ticks)朝下的軸線
+                    const xAxis = d3
+                        .axisBottom(xScale)
+
+                    // 呼叫軸線
+                    d3.select('.axis')
+                    .append("g")
+                    .call(xAxis)
+                    .attr("transform", "translate(0,130)");
+
+
+    </script>
+</body>
+</html>

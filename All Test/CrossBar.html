@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>datachang</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div>
+        <input class="dataChange" type="range" style="width:100% ; cursor:pointer" name="dataChange" min="0" max="10" value="0">
+        <p> data：<span class="showData"></span></p>
+        <div class="example">
+        </div>
+      </div>
+      <script>
+          const dataChange = document.querySelector('.dataChange')
+            const showData = document.querySelector('.showData')
+            let randomData = [] // 先建立空資料陣列
+            dataChange.addEventListener('change', function(){
+                randomData = []  // 每次重選range就清空陣列
+                for(i= 0; i< event.target.value; i++){
+                    let random = Math.floor(Math.random() * 5)
+                    randomData.push(random) // 塞入隨機亂數資料
+                }
+            showData.innerHTML = randomData
+
+            drawDiagram() // 繪製圖表的方法
+                });
+        const rangeSelect =  d3.select('.example')
+                .append('svg')
+                .attr('width', 500)
+                .attr('height', 500)
+            // 製作圖表
+        const drawDiagram =()=>{
+             // 綁定 update 資料
+            let rects = rangeSelect.selectAll('rect')
+                                    .data(randomData)
+            // update 更新綁定的資料
+                rects.attr('width', d => d * 60)
+                
+            // 用 enter 加上少的DOM元素
+            rects.enter()
+                    .append('rect')
+                    .attr('width', d => d * 60)
+                    .attr('height', 50)
+                    .style('fill', 'blue')
+                    .attr('x', (d, index) => 0 ) // 設定x位置
+                    .attr('y', (d, index) => index * 60) // 設定y軸位置
+
+            // 用 exit 移除多的 DOM 元素
+            rects.exit().remove()
+            }
+
+      </script>
+</body>
+</html>

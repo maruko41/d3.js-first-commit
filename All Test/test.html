@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<!-- <p class="updateData"></p>
+<p class="updateData"></p>
+<p class="updateData"></p>
+<p class="updateData"></p> -->
+
+<p class="exitData"></p>
+<p class="exitData"></p>
+<p class="exitData"></p>
+<p class="exitData"></p>
+<p class="exitData"></p>
+
+
+<script>
+
+    const exitData = ["資", "料", "少"];
+    const exData = d3.selectAll('.exitData').data(exitData).exit().remove()
+    console.log('exData', exData);
+/* 
+     const updateData = ["資", "料", "剛", "好"];
+    const upData = d3.selectAll('.updateData').data(updateData)
+    console.log('upData', upData)   */
+
+/*      const enterData = ["資", "料", "比", "較", "多"];
+    const eData = d3.selectAll('.enterData')
+                                    .data(enterData)
+                                    .text(d=>d) // 這邊先處理 update 資料
+                                    .enter() // 這邊接著處理 enter 資料
+                                    .append('p')
+                                    .attr('class', 'enterData')
+                                    .text(d=>d)  */ 
+
+/*     const joinData = ['j', 'o', 'i', 'n']
+    d3.selectAll('.joinData')
+        .data(joinData)
+        .join() // 把update 跟 enter 一起處理
+        .append('p')
+        .attr('class','.joinData') */
+        /* .text(function(d){return d });   */
+/*         .text(function(d){
+        if(d ==='o'){
+            return '抓到你了'
+            } else {
+            return d
+            }
+        }); 
+ */
+/*     .text(d => d === 'o'? '抓到你了' : d) */
+</script>
+</body>
+</html>

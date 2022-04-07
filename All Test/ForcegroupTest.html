@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForcrTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="forceGroup" style="width:500; height:300"></svg>
+    <script>
+        const data = [
+        { "name": "A", "group": 150 },
+        { "name": "B", "group": 150 },
+        { "name": "C", "group": 150 },
+        { "name": "D", "group": 150 },
+        { "name": "E", "group": 150 },
+        { "name": "F", "group": 150 },
+        { "name": "G", "group": 250 },
+        { "name": "H", "group": 250 },
+        { "name": "I", "group": 250 },
+        { "name": "J", "group": 250 },
+        { "name": "K", "group": 250 },
+        { "name": "L", "group": 350 },
+        { "name": "M", "group": 350 },
+        { "name": "N", "group": 350 },
+        { "name": "O", "group": 350 }
+    ]
+
+    // 設定顏色
+    const colorScale = d3.scaleOrdinal()
+	                        .domain([150, 250, 350])
+	                        .range(["red", "blue", "orange"])
+
+    // 建立圓點，全都位於正中央
+    const node = d3.select('.forceGroup')
+               .append('g')
+               .selectAll("circle")
+               .data(data)
+               .enter()
+               .append('circle')
+               .attr('r', 20)
+               .attr('cx', 250)
+               .attr('cy', 150)
+               .style('fill', d=>colorScale(d.group))
+               .style('opacity', '0.6')
+    // 設定力模擬器
+    const simulation = d3.forceSimulation()
+        .force("x", d3.forceX().strength(0.5).x(d => d.group))
+        .force("y", d3.forceY().strength(0.1).y( 150 ))
+        .force("center", d3.forceCenter().x(250).y(150)) 
+        .force("charge", d3.forceManyBody().strength(1)) 
+        .force("collide", d3.forceCollide().strength(.1).radius(20).iterations(1))
+    // 將力模擬器的節點綁定資料
+        simulation.nodes(data)
+                .on("tick", function(d){
+                    node.attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                    });
+    </script>
+</body>
+</html>

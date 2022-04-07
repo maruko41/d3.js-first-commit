@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bar Test</title>
+
+    <script src="https://d3js.org/d3.v7.min.js">
+
+    </script>
+
+</head>
+
+<body>
+    <svg class="stack"></svg>
+    <svg class="rect1"></svg>
+    <svg class="rect"></svg>
+    <h5  class="mt-5">3.完整圖表動畫</h5>
+    <div class="chartContainer"></div>
+    <button type="button" id="start" class="btn btn-primary">動畫開始</button>
+
+    <script>
+        //數據
+// stack
+const dataStack = [
+      {month: new Date(2021, 0, 1), China: 132, America: 80, Taiwan: 30},
+      {month: new Date(2021, 1, 1), China: 67, America: 27, Taiwan: 188},
+      {month: new Date(2021, 2, 1), China: 123, America: 153, Taiwan: 18},
+      {month: new Date(2021, 3, 1), China: 27, America: 112, Taiwan: 20}
+    ];
+
+    const stack = d3.stack()
+                    .keys(['China', 'America', 'Taiwan'])
+
+    const stackedSeries = stack(dataStack);
+    console.log(stackedSeries)
+
+    // 顏色
+    const colorScale = d3.scaleOrdinal()
+                         .domain(['China', 'America', 'Taiwan'])
+                         .range(["red", "blue", "orange"])
+
+    // 建立集合元素g、設定顏色
+    const g = d3.select('.stack')
+                .attr('width', 300)
+                .selectAll('g')
+                .data(stackedSeries)
+                .enter()
+                .append('g')
+                .attr('fill', d => colorScale(d.key));
+    
+    // 繪製長條圖
+    g.selectAll('rect')
+      .data(d=>d)
+      .join('rect')
+      .attr('width', d => d[1] - d[0]) // 長度為終點值減掉起始值
+      .attr('x', d => d[0]) // x 座標設定為起始值
+      .attr('y', (d, i) => i *30) // y 座標用 index 來處理，乘上每條bar想拉開的距離
+      .attr('height', 20);
+
+      //定義兩個資料，都是Y值，x值就用陣列索引即可
+    let data1 = [150, 122, 133, 161, 116, 139, 143, 115, 193, 137, 122, 141];
+    let data2 = [180, 146, 180, 172, 133, 149, 152, 138, 188, 192, 117, 146];
+    let n = data1.length, //資料點的數量
+        mx = d3.max(d3.merge([data1, data2])) //抓兩個陣列的最大值
+
+    // svg
+    const svg = d3.select('.chartContainer').append('svg');
+    svg.attr('width', 500)
+        .attr('height', 300);
+
+    svg.selectAll('rect')
+        .data(data1)
+        .enter()
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', (d, i) => i * 30)
+        .attr('width', (d, i) => d)
+        .attr('height', 20)
+        .attr('fill', 'orange')
+
+    // 動畫開始
+    d3.select('#start')
+      .on('click', function () {
+        svg.selectAll('rect')
+            .data(data2) // 資料變化
+            .transition() // 加上動畫
+            .duration(1000) //點擊之後每個 bar 會在1秒內到達更新位置
+            .delay((d, i) => 200 * i) //每個bar在分別delay後才開始動畫，
+            // delay 時間乘上index，做出從上至下更新的動畫效果
+            .attr('width', (d, i) => d)
+            .attr('fill', '#66f9ff')
+    });
+    </script>
+<!-- <svg width="700" height="500" fill="lightgray">
+    <rect x="0" y="0" width="300" height="200"></rect>
+</svg> -->
+</body>
+</html>

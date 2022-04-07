@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="scatter1 m-auto"></div>
+    <style>
+        .scatter1 {
+      margin: auto;
+      width: 80%;
+      min-width: 300px;
+      margin: auto;
+    }
+    </style>
+    <script>
+        let data = []
+        async function getData() {
+        // 取資料
+        dataGet = await d3.csv('../data/2_TwoNum.csv')
+        console.log(dataGet)
+        data = dataGet
+        scatter1(dataGet)
+        };
+        getData()
+
+        // 建立圖表
+        function scatter1(data){
+        // RWD 清除原本的圖型
+        d3.select(".scatter1").select('svg').remove()
+
+        // 建立 svg
+        const svgWidth = parseInt(d3.select('.scatter1').style('width')),
+                svgHeight = svgWidth
+                margin = 50
+        const svg = d3.select('.scatter1')
+            .append('svg')
+            .attr('width', svgWidth)
+            .attr('height', svgHeight)
+        // 建立X軸線
+        const xScale = d3.scaleLinear()
+            .domain([0,4000])
+            .range([0, (svgWidth - margin*2)])
+
+        const xAxis = d3.axisBottom(xScale)
+                        
+
+        svg.append('g')
+        .attr('transform', `translate(${margin}, ${svgHeight - margin/2})`)
+        .call(xAxis)
+
+        // 建立Y軸線
+        console.log(data)
+        const yScale = d3.scaleLinear()
+            .domain([0,500000])
+            .range([(svgHeight - margin), 0])
+
+        const yAxis = d3.axisLeft(yScale)    
+                        .tickFormat(d=>'$'+d) 
+
+        svg.append('g')
+        .attr('transform', `translate(${margin}, ${margin/2})`)
+        .call(yAxis)
+        // 加上點點
+        svg.append('g')
+        .selectAll('dot')
+        .data(data)
+        .enter()
+            .append('circle')
+            .attr('cx', d => xScale(d.GrLivArea))
+            .attr('cy', d => yScale(d.SalePrice))
+            .attr('r', 1.5)
+            .style('fill', '#69b3a2')
+        }
+    // 加上點點
+        svg.append('g')
+        .selectAll('dot')
+        .data(data)
+        .enter()
+        .append('circle')
+        .attr('cx', d => xScale(d.GrLivArea))
+        .attr('cy', d => yScale(d.SalePrice))
+        .attr('r', 1.5)
+    // 將大於129000的點點都變成粉紅色
+        .style('fill', d => {
+        return d.SalePrice > 129000? 'pink':'#69b3a2' 
+        })
+        // RWD
+        d3.select(window).on("resize", scatter1());
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForcrTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="forceDrag" style="width:500; height:300"></svg>
+    <script>
+        const data = [{name:'A'},{name:'B'},{name:'C'},{name:'D'},{name:'E'},{name:'F'},{name:'G'}]
+        // 建立原點，目前全部都在同個位置
+        const dots = d3.select('.forceDrag')
+                .append('g')
+                .selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('r', 25)
+                .attr('cx', 50)
+                .attr('cy', 50)
+                .style("fill", "#19d3a2")
+                .style("fill-opacity", 0.3)
+                .attr("stroke", "#b3a2c8")
+                .style("stroke-width", 4)
+                .style('cursor', 'pointer')
+
+        // 建立力模擬圖
+        const simulation = d3.forceSimulation()
+            .force("center", d3.forceCenter().x(200).y(150)) //所有節點的中心一致朝指定的位置平移
+            .force("charge", d3.forceManyBody().strength(1))  //正值，節點間就會相互吸引；如果是負值，節點間就會相互排斥
+            .force("collide", d3.forceCollide().strength(.1).radius(30).iterations(1));  //斥力強度
+
+        simulation.nodes(data) //力模擬圖建立的元素與資料綁定
+                .on("tick", function(d){
+                    dots.attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                    });
+        // 拖曳開始
+        function dragstarted(event, d) {
+            // console.log(d)
+            d3.select(this)
+            .style('fill-opacity', 0.6)
+            d.fx = d.x;
+            d.fy = d.y;
+            simulation.alphaTarget(.03).restart();
+        }
+        // 拖曳期間
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        // 拖曳結束
+        function dragended(event, d) {
+            simulation.alphaTarget(.03);
+            d3.select(this)
+            .style('fill-opacity', 0.3)
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // 綁定拖曳事件
+        dots.call(d3.drag() 
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="XY_Axis"></div>
+    <script>
+        const svg = d3.select(".XY_Axis")
+                .append("svg")
+                .attr("width", 500)
+                .attr("height", 200);
+
+        // data
+        const data = [{x:100, y:20}, {x:18, y:30}, {x:90, Y:250}]
+        // map 資料集
+        xData = data.map((i) => i.x); // 預期套資料後會得到 [100, 18, 90] 的陣列
+        yData = data.map((i) => i.y); // 預期套資料後會得到 [20, 30, 250] 的陣列
+        // 設定要給 X 軸用的scale 跟 axis
+        const xScale = d3.scaleLinear()
+                    .domain([0, d3.max(xData)])
+                    .range([20, 480]); // X 軸繪製的viewport起點終點(寬度)
+
+        const xAxis = d3.axisBottom(xScale)
+                    .tickFormat(function (d) {
+                        //調整標籤樣式
+                        return `${d} 元`;
+                    })
+
+        // 呼叫繪製x軸、調整x軸位置
+        const xAxisGroup = svg.append("g")
+                            .call(xAxis)
+                            .attr("transform", "translate(0,180)")
+        // 設定要給 Y 軸用的 scale 跟 axis
+        const yScale = d3.scaleLinear()
+                        .domain([0, d3.max(yData)])
+                        .range([180, 20]);  // Y 軸繪製的viewport 起點終點(高度)
+
+        const yAxis = d3.axisLeft(yScale)
+                        .ticks(5)
+
+        // 呼叫繪製y軸、調整y軸位置
+        const yAxisGroup = svg.append("g")
+                        .call(yAxis)
+                        .attr("transform", "translate(20,0)")
+                        
+    </script>
+</body>
+</html>

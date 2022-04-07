@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="basicDonut"></div>
+    <script>
+        // js
+        const data = [
+            { "value": 1, "property": "p1" },
+            { "value": 2, "property": "p2" },
+            { "value": 3, "property": "p3" },
+            { "value": 4, "property": "p4" },
+            { "value": 5, "property": "p5" },
+            { "value": 6, "property": "p6" }
+        ]
+
+        // 建立svg
+        const svg = d3.select(".basicDonut")
+                    .append('svg')
+                    .attr('width', 300)
+                    .attr('height', 300);
+        // 用 pie()建立圓餅圖 generator
+        const pie = d3.pie()
+            .value((d) => { return d.value })
+            (data);
+
+        // 建立圓弧
+        const arc = d3.arc()
+            .innerRadius(50)
+            .outerRadius(100);
+        // 綁定資料
+        const arcs = svg.append("g")
+            .attr("transform", "translate(150, 120)")
+            .selectAll("arc")
+            .data(pie)
+            .enter()
+            .append("g");
+
+        // 加上路徑 
+        arcs.append("path")
+            .attr("fill", (data, i) => {
+                return d3.schemeSet2[i];
+            })
+            .attr("d", arc);
+        // 加上內部文字標示
+        arcs.append("text")
+            .attr("transform", (d) => {
+                return "translate(" +
+                    arc.centroid(d) + ")";
+            })
+            .text(function (d) {
+                return d.value;
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveTest</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg class="move"></svg>
+<button type="button" class="btn btn-primary moveBtn">移動</button>
+<svg class="changeColor"></svg>
+<button type="button" class="btn btn-primary changeBtn">改變顏色</button>
+<svg class="delay"></svg>
+<button type="button" class="btn btn-primary mt-3 delayBtn">delay開始</button>
+
+<script>
+    const rect = d3.select('.move')
+                .append('rect')
+                .attr('width', 40)
+                .attr('height', 40)
+                .attr('fill','purple')
+                .attr('stroke', 'black')
+    // 移動事件觸發   
+    document.querySelector('.moveBtn').addEventListener('click', function(){
+        rect.transition() // 加上動畫
+            .duration(3000) // 設定動畫時間持續5秒鐘
+            .attr('transform', 'translate(140, 60)')
+    })
+
+    const round = d3.select('.changeColor')
+                .append('circle')
+                .attr('cx', 100)
+                .attr('cy', 50)
+                .attr('r', 25)
+                .attr('fill', 'orange')
+                .attr('stroke-width', '0.5px')
+                .attr('stroke', 'b  lack')
+
+    document.querySelector('.changeBtn').addEventListener('click', function(){
+        round.transition()
+            .duration(1000)
+            .attr('fill', 'pink')
+            .attr('stroke-width', '6px')
+            .attr('stroke', 'lightblue')
+})
+    const dataDelay = [160, 140, 120, 100, 80, 60 ,40 ,20]
+    const delay = d3.select('.delay')
+                    .selectAll('circle')
+                    .data(dataDelay)
+                    .enter()
+                    .append('circle')
+                    .attr('cx', d => d)
+                    .attr('cy', 30)
+                    .attr('r', 15)
+                    .attr('fill', 'lightgreen')
+                    .attr('opacity', '0.5')
+                    document.querySelector('.delayBtn').addEventListener('click', function(){
+                        delay.transition()
+                            .delay((d,i)=> i*200) // 分別延遲
+                            .attr('cx', d => d+120) // 位移距離
+
+})
+</script>
+</body>
+</html>
